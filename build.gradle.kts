@@ -12,6 +12,7 @@ repositories {
 }
 dependencies {
     testImplementation(kotlin("test-junit5"))
+    testImplementation("org.junit.jupiter", "junit-jupiter-params", "5.0.0")
 }
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
