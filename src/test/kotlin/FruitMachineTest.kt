@@ -11,7 +11,7 @@ internal class FruitMachineTest {
 
     @Test
     fun `cannot pull fruit machine lever before player has inserted money`() {
-        val fruitMachine = FruitMachine(BigDecimal.ZERO, SlotGenerator(Random()))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(Random()))
 
         val exception = assertThrows(IllegalStateException::class.java) { fruitMachine.pullLever() }
 
@@ -45,6 +45,33 @@ internal class FruitMachineTest {
         assertEquals(listOf(YELLOW, WHITE, GREEN, BLACK), fruitMachine.slotsDisplayed())
     }
 
+    @Test
+    fun `each time the lever is pulled and player doesn't then win their available balance decreases`() {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(0,2,1,3,0,2,1,3,0,2,1,3,0,2,1,3))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal.TEN)
+
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+
+        assertEquals(7, fruitMachine.gamesRemaining())
+    }
+
+    @Test
+    fun `each time the lever is pulled and player doesn't then win the machine jackpot increases`() {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(0,2,1,3,0,2,1,3,0,2,1,3,0,2,1,3))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal.TEN)
+
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("3.00"), fruitMachine.currentJackpot())
+    }
 
     companion object {
         @JvmStatic
