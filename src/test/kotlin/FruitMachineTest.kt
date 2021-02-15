@@ -87,6 +87,26 @@ internal class FruitMachineTest {
         assertEquals("You have insufficient credit to play the fruit machine", exception.message)
     }
 
+    @Test
+    fun `player can win back all money in machine if they pull lever and colours in each slot are the same`() {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(0,0,0,0,2,1,3,0,2,1,3,0))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal.TEN)
+
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("2.00"), fruitMachine.currentJackpot())
+        assertEquals(8, fruitMachine.gamesRemaining())
+
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("0.00"), fruitMachine.currentJackpot())
+        assertEquals(10, fruitMachine.gamesRemaining())
+
+    }
+
     companion object {
         @JvmStatic
         fun moneyInsertScenarios() = listOf(

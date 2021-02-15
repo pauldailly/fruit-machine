@@ -8,12 +8,18 @@ class FruitMachine(val pricePerGame: BigDecimal, val slotGenerator: SlotGenerato
     private var slots = emptyList<FruitMachineColour>()
 
     fun pullLever() {
-        if(playerBalance < pricePerGame){
+        if (playerBalance < pricePerGame) {
             throw IllegalStateException("You have insufficient credit to play the fruit machine")
         }
-        machineBalance+=pricePerGame
-        playerBalance-=pricePerGame
         slots = slotGenerator.generatedSlots()
+        if (slots.distinct().size == 1) {
+            playerBalance += machineBalance
+            machineBalance = BigDecimal.ZERO
+        } else {
+
+            machineBalance += pricePerGame
+            playerBalance -= pricePerGame
+        }
     }
 
     fun slotsDisplayed() = slots
