@@ -1,14 +1,20 @@
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-class FruitMachine(val pricePerGame: BigDecimal) {
+class FruitMachine(val pricePerGame: BigDecimal, val slotGenerator: SlotGenerator) {
 
     private var playerBalance = BigDecimal.ZERO
-    private val slots = emptyList<FruitMachineColour>()
+    private var slots = emptyList<FruitMachineColour>()
 
     fun pullLever() {
-        throw IllegalStateException("You have insufficient credit to play the fruit machine")
+        if(playerBalance < pricePerGame){
+            throw IllegalStateException("You have insufficient credit to play the fruit machine")
+        }
+
+        slots = slotGenerator.generatedSlots()
     }
+
+    fun slotsDisplayed() = slots
 
     fun insertMoney(amountInserted: BigDecimal) {
         playerBalance += amountInserted

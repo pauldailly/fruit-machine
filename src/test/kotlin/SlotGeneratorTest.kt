@@ -37,10 +37,4 @@ internal class SlotGeneratorTest {
     }
 
 
-    private class MockRandom(val desiredSequence: Stack<Int>) : Random() {
-
-        override fun nextInt(bound: Int): Int {
-            return desiredSequence.pop()
-        }
-    }
 }
