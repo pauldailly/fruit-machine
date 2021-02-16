@@ -1,10 +1,10 @@
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-class FruitMachine(val pricePerGame: BigDecimal, val slotGenerator: SlotGenerator) {
+class FruitMachine(private val pricePerGame: BigDecimal, initialBalance: BigDecimal, private val slotGenerator: SlotGenerator) {
 
     private var playerBalance = BigDecimal.ZERO
-    private var machineBalance = BigDecimal.ZERO
+    private var machineBalance = initialBalance
     private var slots = emptyList<FruitMachineColour>()
 
     fun pullLever() {
@@ -15,8 +15,12 @@ class FruitMachine(val pricePerGame: BigDecimal, val slotGenerator: SlotGenerato
         if (slots.distinct().size == 1) {
             playerBalance += machineBalance
             machineBalance = BigDecimal.ZERO
-        } else {
-
+        } else if (slots.distinct().size == 4) {
+            val prize = machineBalance.divide(BigDecimal("2"), 2, RoundingMode.HALF_UP)
+            machineBalance -= prize
+            playerBalance += prize
+        }
+        else {
             machineBalance += pricePerGame
             playerBalance -= pricePerGame
         }
@@ -30,5 +34,6 @@ class FruitMachine(val pricePerGame: BigDecimal, val slotGenerator: SlotGenerato
 
     fun gamesRemaining(): Int = playerBalance.divide(pricePerGame, RoundingMode.FLOOR).toInt()
     fun currentJackpot(): BigDecimal = machineBalance.setScale(2)
+    fun playerAvailableBalance(): BigDecimal = playerBalance.setScale(2)
 
 }

@@ -11,7 +11,7 @@ internal class FruitMachineTest {
 
     @Test
     fun `cannot pull fruit machine lever before player has inserted money`() {
-        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(Random()))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ZERO, SlotGenerator(Random()))
 
         val exception = assertThrows(IllegalStateException::class.java) { fruitMachine.pullLever() }
 
@@ -25,7 +25,7 @@ internal class FruitMachineTest {
         expectedGames: Int
     ) {
         val pricePerGame = BigDecimal("1.00")
-        val fruitMachine = FruitMachine(pricePerGame, SlotGenerator(Random()))
+        val fruitMachine = FruitMachine(pricePerGame, BigDecimal.ZERO, SlotGenerator(Random()))
 
         amountsToInsert.forEach {
             fruitMachine.insertMoney(it)
@@ -38,7 +38,7 @@ internal class FruitMachineTest {
     fun `pulling fruit machine lever should display the coloured slots generated`() {
         val randomSequence = Stack<Int>()
         randomSequence.addAll(listOf(0,2,1,3))
-        val fruitMachine = FruitMachine(BigDecimal.ZERO, SlotGenerator(MockRandom(randomSequence)))
+        val fruitMachine = FruitMachine(BigDecimal.ZERO, BigDecimal.ZERO, SlotGenerator(MockRandom(randomSequence)))
 
         fruitMachine.pullLever()
 
@@ -47,9 +47,7 @@ internal class FruitMachineTest {
 
     @Test
     fun `each time the lever is pulled and player doesn't then win their available balance decreases`() {
-        val randomSequence = Stack<Int>()
-        randomSequence.addAll(listOf(0,2,1,3,0,2,1,3,0,2,1,3,0,2,1,3))
-        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ZERO, SlotGenerator(MockRandom(nonWinningSequence())))
         fruitMachine.insertMoney(BigDecimal.TEN)
 
         fruitMachine.pullLever()
@@ -61,9 +59,7 @@ internal class FruitMachineTest {
 
     @Test
     fun `each time the lever is pulled and player doesn't then win the machine jackpot increases`() {
-        val randomSequence = Stack<Int>()
-        randomSequence.addAll(listOf(0,2,1,3,0,2,1,3,0,2,1,3,0,2,1,3))
-        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ZERO, SlotGenerator(MockRandom(nonWinningSequence())))
         fruitMachine.insertMoney(BigDecimal.TEN)
 
         fruitMachine.pullLever()
@@ -75,9 +71,7 @@ internal class FruitMachineTest {
 
     @Test
     fun `player will run out of money if they do not win`() {
-        val randomSequence = Stack<Int>()
-        randomSequence.addAll(listOf(0,2,1,3,0,2,1,3,0,2,1,3,0,2,1,3))
-        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ZERO, SlotGenerator(MockRandom(nonWinningSequence())))
         fruitMachine.insertMoney(BigDecimal("2.00"))
 
         fruitMachine.pullLever()
@@ -88,10 +82,10 @@ internal class FruitMachineTest {
     }
 
     @Test
-    fun `player can win back all money in machine if they pull lever and colours in each slot are the same`() {
+    fun `machine should payout current jackpot if player pulls lever and colours in each slot are the same`() {
         val randomSequence = Stack<Int>()
-        randomSequence.addAll(listOf(0,0,0,0,2,1,3,0,2,1,3,0))
-        val fruitMachine = FruitMachine(BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        randomSequence.addAll(listOf(0,0,0,0,2,0,3,0,2,1,3,1))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ZERO, SlotGenerator(MockRandom(randomSequence)))
         fruitMachine.insertMoney(BigDecimal.TEN)
 
         fruitMachine.pullLever()
@@ -104,7 +98,21 @@ internal class FruitMachineTest {
 
         assertEquals(BigDecimal("0.00"), fruitMachine.currentJackpot())
         assertEquals(10, fruitMachine.gamesRemaining())
+        assertEquals(BigDecimal("10.00"), fruitMachine.playerAvailableBalance())
+    }
 
+    @Test
+    fun `machine should payout half the current money it has when player pulls lever and colours in each slot are all different`(){
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(2,1,3,0))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.TEN, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal.ONE)
+
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("5.00"), fruitMachine.currentJackpot())
+        assertEquals(6, fruitMachine.gamesRemaining())
+        assertEquals(BigDecimal("6.00"), fruitMachine.playerAvailableBalance())
     }
 
     companion object {
@@ -119,4 +127,9 @@ internal class FruitMachineTest {
         )
     }
 
+    private fun nonWinningSequence(): Stack<Int> {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(3, 2, 1, 3, 0, 2, 0, 3, 0, 3, 1, 3, 1, 2, 1, 3))
+        return randomSequence
+    }
 }
