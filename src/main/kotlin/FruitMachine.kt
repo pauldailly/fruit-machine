@@ -19,11 +19,28 @@ class FruitMachine(private val pricePerGame: BigDecimal, initialBalance: BigDeci
             val prize = machineBalance.divide(BigDecimal("2"), 2, RoundingMode.HALF_UP)
             machineBalance -= prize
             playerBalance += prize
+        } else if(adjacentSlotsAreSameColour(slots)) {
+            val prize = pricePerGame.multiply(BigDecimal("5"))
+            machineBalance -= prize
+            playerBalance += prize
         }
         else {
             machineBalance += pricePerGame
             playerBalance -= pricePerGame
         }
+    }
+
+    private fun adjacentSlotsAreSameColour(slots: List<FruitMachineColour>): Boolean {
+        // look at first slot, if it's same as second then stop
+        // else look at second slot, if same as 3rd
+        var i = 0
+        while (i < slots.size - 1){
+            if(slots[i] == slots[i+1]) {
+                return true
+            }
+            ++i
+        }
+        return false
     }
 
     fun slotsDisplayed() = slots
