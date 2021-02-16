@@ -133,6 +133,19 @@ internal class FruitMachineTest {
         assertEquals(BigDecimal("6.00"), fruitMachine.playerAvailableBalance())
     }
 
+    @Test
+    fun `when machine does not have sufficient money to pay prize the player should be awarded free plays equal to the amount owed`() {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(listOf(2, 3, 3, 0))
+        val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal.ONE, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal.ONE)
+
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("0.00"), fruitMachine.currentJackpot())
+        assertEquals(6, fruitMachine.gamesRemaining())
+        assertEquals(BigDecimal("2.00"), fruitMachine.playerAvailableBalance())
+    }
 
     companion object {
         @JvmStatic
