@@ -120,7 +120,9 @@ internal class FruitMachineTest {
 
     @ParameterizedTest
     @MethodSource("adjacentSlotScenarios")
-    fun `machine should payout 5 times cost of single play when player pulls lever and colours in 2 or more adjacent slots are the same`(sequence: List<Int>) {
+    fun `machine should payout 5 times cost of single play when player pulls lever and colours in 2 or more adjacent slots are the same`(
+        sequence: List<Int>
+    ) {
         val randomSequence = Stack<Int>()
         randomSequence.addAll(sequence)
         val fruitMachine = FruitMachine(BigDecimal.ONE, BigDecimal("20.00"), SlotGenerator(MockRandom(randomSequence)))
@@ -145,6 +147,32 @@ internal class FruitMachineTest {
         assertEquals(BigDecimal("0.00"), fruitMachine.currentJackpot())
         assertEquals(6, fruitMachine.gamesRemaining())
         assertEquals(BigDecimal("2.00"), fruitMachine.playerAvailableBalance())
+    }
+
+    @Test
+    fun `when machine awards player free plays then player should be able to use them`() {
+        val randomSequence = Stack<Int>()
+        randomSequence.addAll(nonWinningSequence() + nonWinningSequence() + listOf(2, 3, 3, 0))
+        val fruitMachine = FruitMachine(BigDecimal("0.50"), BigDecimal.ZERO, SlotGenerator(MockRandom(randomSequence)))
+        fruitMachine.insertMoney(BigDecimal("0.50"))
+
+        fruitMachine.pullLever()
+
+        assertEquals(BigDecimal("0.00"), fruitMachine.currentJackpot())
+        assertEquals(6, fruitMachine.gamesRemaining())
+        assertEquals(BigDecimal("0.50"), fruitMachine.playerAvailableBalance())
+
+        // Play the 6 games
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+        fruitMachine.pullLever()
+
+        // No more money or free plays
+        val exception = assertThrows(IllegalStateException::class.java) { fruitMachine.pullLever() }
+        assertEquals("You have insufficient credit to play the fruit machine", exception.message)
     }
 
     companion object {

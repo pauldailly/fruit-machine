@@ -13,9 +13,10 @@ class FruitMachine(
     private var freeGames = 0
 
     fun pullLever() {
-        if (playerBalance < pricePerGame) {
+        if (playerBalance < pricePerGame && freeGames == 0) {
             throw IllegalStateException("You have insufficient credit to play the fruit machine")
         }
+
         slots = slotGenerator.generatedSlots()
         when {
             allSlotsAreSameColour() -> {
@@ -28,7 +29,7 @@ class FruitMachine(
                 calculateAdjacentSlotPrize()
             }
             else -> {
-                deductMoneyFromPlayer()
+                playerPaysForGame()
             }
         }
     }
@@ -82,8 +83,12 @@ class FruitMachine(
         return false
     }
 
-    private fun deductMoneyFromPlayer() {
-        machineBalance += pricePerGame
-        playerBalance -= pricePerGame
+    private fun playerPaysForGame() {
+        if (freeGames > 0) {
+            --freeGames
+        } else {
+            machineBalance += pricePerGame
+            playerBalance -= pricePerGame
+        }
     }
 }
