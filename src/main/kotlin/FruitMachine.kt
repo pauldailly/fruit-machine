@@ -71,8 +71,6 @@ class FruitMachine(
     private fun allSlotsAreSameColour() = slots.distinct().size == 1
 
     private fun adjacentSlotsAreSameColour(): Boolean {
-        // look at first slot, if it's same as second then stop
-        // else look at second slot, if same as 3rd
         var i = 0
         while (i < slots.size - 1) {
             if (slots[i] == slots[i + 1]) {
