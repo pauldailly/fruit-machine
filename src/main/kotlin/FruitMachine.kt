@@ -13,7 +13,7 @@ class FruitMachine(
     private var freeGames = 0
 
     fun pullLever() {
-        if (playerBalance < pricePerGame && freeGames == 0) {
+        if (playerHasInsufficientCredit()) {
             throw IllegalStateException("You have insufficient credit to play the fruit machine")
         }
 
@@ -25,7 +25,7 @@ class FruitMachine(
             allSlotsAreDifferentColours() -> {
                 calculateUniqueSlotsPrize()
             }
-            adjacentSlotsAreSameColour(slots) -> {
+            adjacentSlotsAreSameColour() -> {
                 calculateAdjacentSlotPrize()
             }
             else -> {
@@ -70,7 +70,7 @@ class FruitMachine(
 
     private fun allSlotsAreSameColour() = slots.distinct().size == 1
 
-    private fun adjacentSlotsAreSameColour(slots: List<FruitMachineColour>): Boolean {
+    private fun adjacentSlotsAreSameColour(): Boolean {
         // look at first slot, if it's same as second then stop
         // else look at second slot, if same as 3rd
         var i = 0
@@ -91,4 +91,6 @@ class FruitMachine(
             playerBalance -= pricePerGame
         }
     }
+
+    private fun playerHasInsufficientCredit() = playerBalance < pricePerGame && freeGames == 0
 }
